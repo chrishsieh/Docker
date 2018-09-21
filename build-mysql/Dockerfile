@@ -15,5 +15,5 @@ RUN chmod +x /scripts/startup
 
 EXPOSE 3306
 
-ENTRYPOINT ["/scripts/startup"]
+CMD ["/scripts/startup"]
 

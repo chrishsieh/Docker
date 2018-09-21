@@ -8,6 +8,8 @@ MYSQL_USER=$(cat /run/secrets/crm_secrets | jq -r '.mysql.MYSQL_USER')
 MYSQL_USER_PWD=$(cat /run/secrets/crm_secrets | jq -r '.mysql.MYSQL_USER_PWD')
 MYSQL_USER_DB=$(cat /run/secrets/crm_secrets | jq -r '.mysql.MYSQL_USER_DB')
 
+sed -i 's@/run/mysqld/mysqld\.sock@'"$MYSQL_DATADIR"'/mysqld.sock@g' /etc/mysql/my.cnf
+
 if [ $MYSQL_ROOT_PWD = "changeme" ]; then
     figlet -f colossal "WARNING"
     red=$(tput setaf 1)    # Red
@@ -32,24 +34,24 @@ if [ $MYSQL_USER_PWD = "changeme" ]; then
     ${reset}
 fi
 
-if [ -d "/run/mysqld" ]; then
+if [ -s $MYSQL_DATADIR/mysqld-up ]; then
         echo "[i] MySQL directory already present, skipping creation"
 else
-	echo "[i] mysqld not found, creating...."
-	mkdir -p /run/mysqld
-	chown -R mysql:mysql /run/mysqld
-	echo 'Initializing database'
+    echo "[i] mysqld not found, creating...."
+    mkdir -p /run/mysqld
+    chown -R mysql:mysql /run/mysqld
+    echo 'Initializing database'
         mkdir -p "$MYSQL_DATADIR/mysql"
         chown -R mysql:mysql $MYSQL_DATADIR
 	mysql_install_db --user=mysql --datadir="$MYSQL_DATADIR" --rpm
-	echo 'Database initialized'
+    echo 'Database initialized'
 
-	tfile=`mktemp`
-	if [ ! -f "$tfile" ]; then
-	    return 1
-	fi
+    tfile=`mktemp`
+    if [ ! -f "$tfile" ]; then
+        return 1
+    fi
 
-	cat << EOF > $tfile
+    cat << EOF > $tfile
 USE mysql;
 SET @@SESSION.SQL_LOG_BIN=0 ;
 FLUSH PRIVILEGES ;
@@ -60,20 +62,21 @@ CREATE USER '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_USER_PWD}' ;
 CREATE USER '${MYSQL_USER}'@'localhost' IDENTIFIED BY '${MYSQL_USER_PWD}' ;
 EOF
 
-	if [ "$MYSQL_USER_DB" != "" ]; then
-	    echo "[i] Creating database: $MYSQL_USER_DB"
-	    echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_USER_DB\` CHARACTER SET utf8 COLLATE utf8_general_ci;" >> $tfile
+    if [ "$MYSQL_USER_DB" != "" ]; then
+        echo "[i] Creating database: $MYSQL_USER_DB"
+        echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_USER_DB\` CHARACTER SET utf8 COLLATE utf8_general_ci;" >> $tfile
 
-	    if [ "$MYSQL_USER" != "" ]; then
-		#echo "[i] Creating user: $MYSQL_USER with password $MYSQL_USER_PWD"
-		echo "GRANT ALL PRIVILEGES ON \`$MYSQL_USER_DB\`.* to '$MYSQL_USER'@'%' identified by '${MYSQL_USER_PWD}' ;" >> $tfile
-		echo "GRANT ALL PRIVILEGES ON \`$MYSQL_USER_DB\`.* to '$MYSQL_USER'@'localhost' identified by '${MYSQL_USER_PWD}' ;" >> $tfile
-		echo "FLUSH PRIVILEGES ;" >> $tfile
-	    fi
-	fi
+        if [ "$MYSQL_USER" != "" ]; then
+        #echo "[i] Creating user: $MYSQL_USER with password $MYSQL_USER_PWD"
+        echo "GRANT ALL PRIVILEGES ON \`$MYSQL_USER_DB\`.* to '$MYSQL_USER'@'%' identified by '${MYSQL_USER_PWD}' ;" >> $tfile
+        echo "GRANT ALL PRIVILEGES ON \`$MYSQL_USER_DB\`.* to '$MYSQL_USER'@'localhost' identified by '${MYSQL_USER_PWD}' ;" >> $tfile
+        echo "FLUSH PRIVILEGES ;" >> $tfile
+        fi
+    fi
 
-	/usr/bin/mysqld --user=mysql --bootstrap --verbose=1 --datadir="$MYSQL_DATADIR" < $tfile
+    /usr/bin/mysqld --user=mysql --bootstrap --verbose=1 --datadir="$MYSQL_DATADIR" < $tfile
     rm -f "$tfile"
+    echo "">$MYSQL_DATADIR/mysqld-up
 fi
 
 exec /usr/bin/mysqld --user=mysql --console --datadir="$MYSQL_DATADIR"
