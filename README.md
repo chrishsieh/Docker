@@ -8,7 +8,7 @@ It is necessary to have Docker installed on your system for this to work. See ht
 
 * Clone this repository.
 * Change your desired **database info** and **passwords** in the crm_secrets.json file. **PLEASE CHANGE**
-* Change your desired SSL setup in the docker_compose.yml file under the nginx: args section. (Read commented lines to see your options)
+* Change your desired SSL setup in the ssl.json file, if use letsencrypt dns mode, need setup dns_api.json.
 * From the command line, navigate to the root folder of your local repository and use docker-compose to build and run ChurchCRM. Run the following commands.
     - `docker-compose build`
     - `docker-compose up`
@@ -22,8 +22,9 @@ It is necessary to have Docker installed on your system for this to work. See ht
 
 ChurchCRM for Docker is set to run by default using SSL encryption. There are 3 build options in regards to SSL.
 
+* `letsencrypt`: Support acme.sh to set letsencrypt, default is webroot mode, use port 80 to check the domain permission.Support dns mode, use API update dns server to check domain ownship, use this mode can let internal net have letsencrypt support. Use dns mode need set the dns_api.json, first issue SSL certificates need wait dns server 120 seconds. See https://github.com/Neilpang/acme.sh/tree/master/dnsapi. "extra_parameter" can add --test for test certificates, add --forece to force update certrificates, when ssl folder no fullchain.cer file, will issue a new SSL certificates.
 * `build`: This option will create an SSL certificate for you. Please fill out your information in the docker_compose.yml file under the nginx: args section.
-* `own`: With this option, you will need to provide your own SSL certificates. Please put your own "server.crt" and "server.key" files in the "buildnginx/conf.d folder. SSL will not work if chooseing this option and not adding the correctly named certificates there.
+* `own`: With this option, you will need to provide your own SSL certificates. Please put your own "fullchain.cer" and "domain.key" files in the ssl folder. SSL will not work if chooseing this option and not adding the correctly named certificates there.
 * `none`: This will run an installation of ChurchCRM without SSL. You will be able to access your installation at http://localhost (as opposed to https://localhost)
 
 **NOTE** While using SSL on localhost, browsers will prompt with an error/warning that they don't recognize the Certificate Authority *(which is yourself in this case)*. When this occurs, allow the exception and continue to the site.
