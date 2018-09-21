@@ -32,30 +32,33 @@ services:
 
   nginx:
     build:
-      context: ./buildnginx
-      args:
-        ssl: build # (none/own/build)
-        # If you would like for the build script to setup SSL on your server, uncomment the lines below and change the values.
-        # If you want to provide your own certificate, put the "server.crt" and "server.key" files in the "buildnginx/conf.d folder"
-        country: US # Country Name (2 letter code)
-        state: Tennessee # State or Province Name (full name)
-        locality: Nashville # Locality Name (eg, city)
-        organization: ChurchCRM # Organization Name (eg, company)
-        organizationalunit: IT # Organizational Unit Name (eg, section)
-        email: myemail@example.com # Your Email Address
-        commonname: localhost # Common Name (e.g. server FQDN or YOUR name)
-    container_name: crm-nginx
-    links:
-      - churchcrm
+      context: ./build-nginx
+    container_name: nginx-letsencrypt
     volumes:
       - ./www:/var/www
+      - ./ssl:/etc/nginx/ssl
+      - ./conf.site:/etc/nginx/conf.d/site
+      - ssl_vol:/root/.acme.sh
+    links:
+      - churchcrm
     ports:
       - "80:80"
       - "443:443"
+    secrets:
+      - ssl.json
+      - dns_api.json
+#      - ssl_test
 
 secrets:
+  ssl.json:
+    file: ./ssl.json
+  dns_api.json:
+    file: ./dns_api.json
   crm_secrets:
     file: ./crm_secrets.json
+  ssl_test:
+    file: ./test/ssl_test
 
 volumes:
   db-volume:
+  ssl_vol:

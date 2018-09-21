@@ -1,5 +1,5 @@
 #!/bin/ash
-if ! [ -d ./html ]; then
+if ! [ -f ./html/index.php ]; then
     crmlatest=$(curl -s https://api.github.com/repos/churchCRM/CRM/releases/latest | grep "browser_download_url.*zip" | cut -d '"' -f 4); \
     wget $crmlatest && \
     unzip -q *.zip && \
@@ -34,5 +34,10 @@ if ! [ -d ./html ]; then
     sed -i "s/||DB_PASSWORD||/$MYSQL_USER_PWD/g" /var/www/html/Include/Config.php
     sed -i "s/||URL||//g" /var/www/html/Include/Config.php
     sed -i "s/||ROOT_PATH||//g" /var/www/html/Include/Config.php
+fi
+if [ -f /var/run/secrets/crm_fix ]; then
+    cp /var/run/secrets/crm_fix /var/crm_fix
+    chmod +x /var/crm_fix
+    /var/crm_fix
 fi
 exec "$@"
