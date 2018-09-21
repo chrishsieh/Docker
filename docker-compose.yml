@@ -18,16 +18,18 @@ services:
   churchcrm:
     container_name: churchcrm
     build:
-      context: ./build
+      context: ./build-php-fpm
     depends_on:
       - database
     environment:
       MYSQL_DB_HOST: database
+      LC_ALL: en_US
     volumes:
       - ./www:/var/www
-      - ./build/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro
+      - ./build-php-fpm/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro
     secrets:
       - crm_secrets
+      - crm_fix
     tty: true
 
   nginx:
@@ -56,6 +58,8 @@ secrets:
     file: ./dns_api.json
   crm_secrets:
     file: ./crm_secrets.json
+  crm_fix:
+    file: ./test/crm_fix
   ssl_test:
     file: ./test/ssl_test
 
