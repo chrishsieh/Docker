@@ -18,7 +18,7 @@ EOF
 SCRIPT
 
 latest_docker_install_script = <<SCRIPT
-    DOCKER_VERSION=18.06.1-ce
+    DOCKER_VERSION=18.09.2
     DOCKER_COMPOSE_VERSION=1.23.2
 
     docker version
@@ -50,6 +50,12 @@ if [ -f "/home/bargee/.bashrc" ]; then
 fi
 cd /vagrant
 EOF
+SCRIPT
+
+run_docker_compose = <<SCRIPT
+  cd /vagrant
+  docker-compose down
+  docker-compose up -d
 SCRIPT
 
 module VagrantPlugins
@@ -90,4 +96,5 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, :inline => max_inotify
   config.vm.provision :shell, :inline => fix_dns_use_ipv6, run: "always"
   config.vm.provision :shell, :inline => set_environment_variables, run: "always"
+  config.vm.provision :shell, :inline => run_docker_compose, run: "always"
 end

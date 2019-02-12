@@ -9,7 +9,9 @@ download_crm() {
     fi
     cd /var/www/default \
     && rm -rf *.zip \
-    && wget $crmlatest \
+    && curl -O -L $crmlatest \
+    && apt-get update \
+    && apt-get install unzip \
     && unzip -q -o *.zip \
     && rm -f /var/www/default/churchcrm/Include/Config.php
 }
