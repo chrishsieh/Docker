@@ -32,7 +32,7 @@ services:
       CRM_RELEASE_VERSION: ${CRM_VER:-latest}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-churchcrmDB}
       TIMEZONE: ${OS_TIMEZONE:-UTC}
-      FORWARD_PORTS_TO_LOCALHOST: '3306:mysql:3306, 80:apache:80, 443:apache:443'
+      FORWARD_PORTS_TO_LOCALHOST: '3306:mysql:3306, 80:web:80, 443:web:443'
       DOCKER_LOGS: 0
 #      DEBUG_RUNTIME: 1
 #      DEBUG_ENTRYPOINT: 1
@@ -48,9 +48,9 @@ services:
       - mysql_user
       - mysql_pwd
 
-  apache:
-    container_name: apache
-    image: devilbox/apache-${APACHE_VER:-2.4}
+  web:
+    container_name: web
+    image: devilbox/${WEB_VER:-apache-2.4}
     links:
       - mysql
       - php
@@ -70,8 +70,9 @@ services:
     volumes:
       - ./www:/var/www/default
       - ./ca:/ca
+      - ./templates/:/var/www/default/cfg
       ## enabled by setting DOCKER_LOGS: 0
-      - ./log/apache/:/var/log/apache-${APACHE_VER:-2.4}
+      - ./log/web/${WEB_VER:-apache-2.4}/:/var/log/${WEB_VER:-apache-2.4}
       - httpd:/shared/httpd
     ports:
       - "80:80"
