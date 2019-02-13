@@ -10,10 +10,10 @@ services:
     container_name: mysql
     image: mariadb:${MYSQL_VER:-10.3}
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PWD:-mysqlRoot}
-      MYSQL_DATABASE: ${MYSQL_USER_DB:-churchcrm}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-mysqlRoot}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-churchcrmDB}
       MYSQL_USER: ${MYSQL_USER:-churchcrm}
-      MYSQL_PASSWORD: ${MYSQL_USER_PWD:-mysqlPWD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-mysqlPWD}
     volumes:
       ## keep database
       - mysql_data:/var/lib/mysql
@@ -26,9 +26,9 @@ services:
     environment:
       ## version can be latest or 3.2.3 ...
       CRM_RELEASE_VERSION: ${CRM_VER:-latest}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-churchcrmDB}
       MYSQL_USER: ${MYSQL_USER:-churchcrm}
-      MYSQL_USER_PWD: ${MYSQL_USER_PWD:-mysqlPWD}
-      MYSQL_USER_DB: ${MYSQL_USER_DB:-churchcrm}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-mysqlPWD}
       FORWARD_PORTS_TO_LOCALHOST: '3306:mysql:3306, 80:apache:80, 443:apache:443'
       DOCKER_LOGS: 0
 #      DEBUG_RUNTIME: 1
