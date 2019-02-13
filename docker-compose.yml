@@ -31,8 +31,6 @@ services:
       ## version can be latest or 3.2.3 ...
       CRM_RELEASE_VERSION: ${CRM_VER:-latest}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-churchcrmDB}
-      MYSQL_USER_FILE: /run/secrets/mysql_user
-      MYSQL_PASSWORD_FILE: /run/secrets/mysql_pwd
       TIMEZONE: ${OS_TIMEZONE:-UTC}
       FORWARD_PORTS_TO_LOCALHOST: '3306:mysql:3306, 80:apache:80, 443:apache:443'
       DOCKER_LOGS: 0

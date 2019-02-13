@@ -1,18 +1,5 @@
 set -x
 
-# usage: file_env VAR [DEFAULT]
-#    ie: file_env 'XYZ_DB_PASSWORD' 'example'
-# (will allow for "$XYZ_DB_PASSWORD_FILE" to fill in the value of
-#  "$XYZ_DB_PASSWORD" from a file, especially for Docker's secrets feature)
-file_env() {
-    local var="$1"
-    local fileVar="${var}_FILE"
-    local def="${2:-}"
-    local val="$def"
-    val="$(< "${!fileVar}")"
-    export "$var"="$val"
-}
-
 download_crm() {
     local crmlatest;
     if [ "${CRM_RELEASE_VERSION}" == "latest" ]; then
@@ -42,8 +29,8 @@ if ! [ -f /var/www/default/churchcrm/Include/Config.php ]; then
     chmod 777 /var/www/default/churchcrm/Include/Config.php
 
     set +x
-    file_env 'MYSQL_USER' 'churchcrm'
-    file_env 'MYSQL_PASSWORD' 'churchcrm'
+    MYSQL_USER="$(< "/run/secrets/mysql_user")"
+    MYSQL_PASSWORD="$(< "/run/secrets/mysql_pwd")"
 
     # Create ChurchCRM Config File
     sed -i "s/||DB_SERVER_NAME||/mysql/g" /var/www/default/churchcrm/Include/Config.php
