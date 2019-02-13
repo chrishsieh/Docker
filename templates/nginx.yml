@@ -99,6 +99,18 @@ features:
     location / {
         try_files $uri $uri/ /index.php$is_args$args;
     }
+    location /api/ {
+      try_files $uri /api/index.php$is_args$args;
+    }
+    location /v2/ {
+      try_files $uri /v2/index.php$is_args$args;
+    }
+    location /external/ {
+      try_files $uri /external/index.php$is_args$args;
+    }
+    location /setup/ {
+      try_files $uri /setup/index.php$is_args$args;
+    }
     location ~ \.php?$ {
         try_files $uri = 404;
         include fastcgi_params;
@@ -110,15 +122,6 @@ features:
         fastcgi_read_timeout __PHP_TIMEOUT__;
         fastcgi_index index.php;
         fastcgi_intercept_errors on;
-    }
-    location /api/ {
-      try_files $uri /api/index.php$is_args$args;
-    }
-    location /v2/ {
-      try_files $uri /v2/index.php$is_args$args;
-    }
-    location /external/ {
-      try_files $uri /external/index.php$is_args$args;
     }
   alias: |
     # Alias Definition
