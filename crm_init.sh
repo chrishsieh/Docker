@@ -1,5 +1,18 @@
 set -x
 
+# usage: file_env VAR [DEFAULT]
+#    ie: file_env 'XYZ_DB_PASSWORD' 'example'
+# (will allow for "$XYZ_DB_PASSWORD_FILE" to fill in the value of
+#  "$XYZ_DB_PASSWORD" from a file, especially for Docker's secrets feature)
+file_env() {
+    local var="$1"
+    local fileVar="${var}_FILE"
+    local def="${2:-}"
+    local val="$def"
+    val="$(< "${!fileVar}")"
+    export "$var"="$val"
+}
+
 download_crm() {
     local crmlatest;
     if [ "${CRM_RELEASE_VERSION}" == "latest" ]; then
@@ -28,14 +41,19 @@ if ! [ -f /var/www/default/churchcrm/Include/Config.php ]; then
     cp /var/www/default/churchcrm/Include/Config.php.example /var/www/default/churchcrm/Include/Config.php
     chmod 777 /var/www/default/churchcrm/Include/Config.php
 
+    set +x
+    file_env 'MYSQL_USER' 'churchcrm'
+    file_env 'MYSQL_PASSWORD' 'churchcrm'
+
     # Create ChurchCRM Config File
     sed -i "s/||DB_SERVER_NAME||/mysql/g" /var/www/default/churchcrm/Include/Config.php
     sed -i "s/||DB_SERVER_PORT||/3306/g" /var/www/default/churchcrm/Include/Config.php
-    sed -i "s/||DB_NAME||/$MYSQL_USER_DB/g" /var/www/default/churchcrm/Include/Config.php
+    sed -i "s/||DB_NAME||/$MYSQL_DATABASE/g" /var/www/default/churchcrm/Include/Config.php
     sed -i "s/||DB_USER||/$MYSQL_USER/g" /var/www/default/churchcrm/Include/Config.php
-    sed -i "s/||DB_PASSWORD||/$MYSQL_USER_PWD/g" /var/www/default/churchcrm/Include/Config.php
+    sed -i "s/||DB_PASSWORD||/$MYSQL_PASSWORD/g" /var/www/default/churchcrm/Include/Config.php
     sed -i "s/||URL||//g" /var/www/default/churchcrm/Include/Config.php
     sed -i "s/||ROOT_PATH||//g" /var/www/default/churchcrm/Include/Config.php
+    set -x
 fi
 
 /docker-entrypoint.sh
