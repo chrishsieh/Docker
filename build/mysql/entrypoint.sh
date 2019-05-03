@@ -9,4 +9,4 @@ do
 	fi
 done
 
-/bin/bash /docker-entrypoint.sh mysqld
+/bin/bash /docker-entrypoint.sh mysqld --user=mysql --console --skip-name-resolve --skip-networking=0

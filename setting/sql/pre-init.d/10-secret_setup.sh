@@ -29,5 +29,3 @@ if [ $MYSQL_PASSWORD = "changeme" ]; then
     echo "$(tput sgr0)"
     exit 1
 fi
-
-/bin/bash /docker-entrypoint.sh mysqld
