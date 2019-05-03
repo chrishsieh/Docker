@@ -1,9 +1,5 @@
 FROM php:7-fpm-alpine
-
-LABEL \
-	name="PHP-FPM Image" \
-	image="chrishsieh/php-fpm:alpine" \
-    license="MIT"
+MAINTAINER ChurchCRM
 
 ENV BUILD_DEPS="cmake icu-dev freetype-dev libjpeg-turbo-dev libpng-dev libzip-dev imagemagick-dev gettext-dev" \
     RUN_DEPS="sudo dumb-init libarchive-tools icu gettext jq zip git wget \
@@ -65,6 +61,7 @@ RUN set -x \
     && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 
 WORKDIR /var/www
+ENV TERM="xterm-color"
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 COPY entrypoint.sh /entrypoint.sh
 COPY func.d/*.sh /scripts/func.d/

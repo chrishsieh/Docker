@@ -34,6 +34,7 @@ if ! [ -f ./CRM/churchcrm/Include/Config.php ]; then
         echo "${red}This is EXTREMELY insecure. Please go back and change the password to something more secure and re-build your images by running docker-compose build"
         echo "${red}*********************************************"
         echo "$(tput sgr0)"
+        rm /var/www/CRM/churchcrm/Include/Config.php
         exit 1
     fi
 

@@ -2,7 +2,6 @@ version: '3.5'
 services:
   web:
     container_name: web
-    image: chrishsieh/nginx-proxy:latest
     build:
       context: ./build/nginx
     environment:
@@ -33,7 +32,6 @@ services:
 
   db:
     container_name: db
-    image: chrishsieh/mysql:latest
     build:
       context: ./build/mysql
     volumes:
@@ -44,7 +42,6 @@ services:
 
   php:
     container_name: php
-    image: chrishsieh/php-fpm:alpine
     build:
       context: ./build/php
     links:
@@ -62,8 +59,7 @@ services:
       - ENABLE_ACME=${_ENABLE_ACME:-false}                  ##### letsencrypt setting
       - ENABLE_HSTS=${_ENABLE_HSTS:-false}
     volumes:
-      - default-volume:/var/www
-      - php-volume:/var/www/CRM/churchcrm                   ##### php code
+      - php-volume:/var/www
       - ./setting/php/pre-init.d/:/scripts/pre-init.d/
       - ./setting/php/php.ini:/usr/local/etc/php/php.ini
       - ./setting/php/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro
@@ -82,5 +78,4 @@ secrets:
 volumes:
   db-volume:
   dhparam-volume:
-  default-volume:
   php-volume:
