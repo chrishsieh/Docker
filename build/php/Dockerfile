@@ -1,10 +1,7 @@
 FROM php:7-fpm-alpine
 MAINTAINER ChurchCRM
 
-ENV BUILD_DEPS="cmake icu-dev freetype-dev libjpeg-turbo-dev libpng-dev libzip-dev imagemagick-dev gettext-dev" \
-    RUN_DEPS="sudo dumb-init libarchive-tools icu gettext jq zip git wget \
-            freetype libjpeg-turbo libpng libzip mysql-client imagemagick \
-            socat supervisor ca-certificates bash ncurses"
+ENV BUILD_DEPS="cmake icu-dev freetype-dev libjpeg-turbo-dev libpng-dev libzip-dev imagemagick-dev gettext-dev"
 
 RUN set -x \
 # ---- Installing Build dependencies ----
@@ -49,7 +46,13 @@ RUN set -x \
 	&& (rm -rf /usr/local/lib/php/test/zip || true) \
 	&& (rm -rf /usr/local/lib/php/doc/zip || true) \
 # ---- Removing Build dependencies ----
-    && apk del .build-deps \
+    && apk del .build-deps
+
+ENV RUN_DEPS="sudo dumb-init libarchive-tools icu gettext jq zip git wget \
+            freetype libjpeg-turbo libpng libzip imagemagick \
+            socat supervisor ca-certificates bash ncurses"
+
+RUN set -x \
 # ---- Installing Running dependencies ----
     && apk --update add ${RUN_DEPS} \
     && update-ca-certificates \
