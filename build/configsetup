@@ -3,8 +3,8 @@ cp /usr/local/apache2/htdocs/Include/Config.php.example /usr/local/apache2/htdoc
 
 # Import Docker Secrets
 MYSQL_USER=$(cat /run/secrets/crm_secrets | jq -r '.mysql.MYSQL_USER')
-MYSQL_USER_PWD=$(cat /run/secrets/crm_secrets | jq -r '.mysql.MYSQL_USER_PWD')
-MYSQL_USER_DB=$(cat /run/secrets/crm_secrets | jq -r '.mysql.MYSQL_USER_DB')
+MYSQL_USER_PWD=$(cat /run/secrets/crm_secrets | jq -r '.mysql.MYSQL_PASSWORD')
+MYSQL_USER_DB=$(cat /run/secrets/crm_secrets | jq -r '.mysql.MYSQL_DATABASE')
 
 if [ $MYSQL_USER_PWD = "changeme" ]; then
     figlet -f colossal "WARNING"

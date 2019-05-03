@@ -27,7 +27,6 @@ RUN echo "@edge http://dl-3.alpinelinux.org/alpine/edge/main" >> /etc/apk/reposi
     php7-intl \
     php7-json \
     php7-mbstring \
-    php7-mcrypt \
     php7-mysqli \
     php7-mysqlnd \
     php7-pdo \
@@ -35,7 +34,8 @@ RUN echo "@edge http://dl-3.alpinelinux.org/alpine/edge/main" >> /etc/apk/reposi
     php7-phar \
     php7-session \
     php7-sqlite3 \
-    php7-xml && \
+    php7-xml \
+    php7-zip && \
     ln -s /usr/lib/apache2/mod_php7.so /usr/local/apache2/modules
 
 # Copy Apache configurations
