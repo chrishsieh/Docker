@@ -9,8 +9,8 @@ RUN set -x \
 # ---- Update PHP pecl ----
     && pecl channel-update pecl.php.net \
 # ---- Installing PHP Extension: exif ----
-	&& /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) exif \
-	&& (rm -rf /usr/local/lib/php/test/exif || true) \
+    && /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) exif \
+    && (rm -rf /usr/local/lib/php/test/exif || true) \
     && (rm -rf /usr/local/lib/php/doc/exif || true) \
 # ---- Installing PHP Extension: gd ----
     && /usr/local/bin/docker-php-ext-configure gd --with-gd --with-png-dir=/usr --with-zlib-dir=/usr --with-jpeg-dir=/usr --with-freetype-dir=/usr --enable-gd-jis-conv \
@@ -19,57 +19,58 @@ RUN set -x \
     && (rm -rf /usr/local/lib/php/test/gd || true) \
     && (rm -rf /usr/local/lib/php/doc/gd || true) \
 # ---- Installing PHP Extension: gettext ----
-	&& /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) gettext \
-	&& (rm -rf /usr/local/lib/php/test/gettext || true) \
+    && /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) gettext \
+    && (rm -rf /usr/local/lib/php/test/gettext || true) \
     && (rm -rf /usr/local/lib/php/doc/gettext || true) \
 # ---- Installing PHP Extension: imagick ----
-	&& pecl install imagick \
-	&& docker-php-ext-enable imagick \
-	&& (rm -rf /usr/local/lib/php/test/imagick || true) \
-	&& (rm -rf /usr/local/lib/php/doc/imagick || true) \
+    && pecl install imagick \
+    && docker-php-ext-enable imagick \
+    && (rm -rf /usr/local/lib/php/test/imagick || true) \
+    && (rm -rf /usr/local/lib/php/doc/imagick || true) \
 # ---- Installing PHP Extension: intl ----
-	&& /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) intl \
-	&& (rm -rf /usr/local/lib/php/test/intl || true) \
+    && /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) intl \
+    && (rm -rf /usr/local/lib/php/test/intl || true) \
     && (rm -rf /usr/local/lib/php/doc/intl || true) \
 # ---- Installing PHP Extension: mysqli ----
-	&& /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) mysqli \
-	&& (rm -rf /usr/local/lib/php/test/mysqli || true) \
+    && /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) mysqli \
+    && (rm -rf /usr/local/lib/php/test/mysqli || true) \
     && (rm -rf /usr/local/lib/php/doc/mysqli || true) \
 # ---- Installing PHP Extension: pdo_mysql ----
-	&& /usr/local/bin/docker-php-ext-configure pdo_mysql --with-zlib-dir=/usr \
-	&& /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) pdo_mysql \
-	&& (rm -rf /usr/local/lib/php/test/pdo_mysql || true) \
+    && /usr/local/bin/docker-php-ext-configure pdo_mysql --with-zlib-dir=/usr \
+    && /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) pdo_mysql \
+    && (rm -rf /usr/local/lib/php/test/pdo_mysql || true) \
     && (rm -rf /usr/local/lib/php/doc/pdo_mysql || true) \
 # ---- Installing PHP Extension: zip ----
-	&& /usr/local/bin/docker-php-ext-configure zip --with-zlib-dir=/usr --with-pcre-dir=/usr --with-libzip \
-	&& /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) zip \
-	&& (rm -rf /usr/local/lib/php/test/zip || true) \
-	&& (rm -rf /usr/local/lib/php/doc/zip || true) \
+    && /usr/local/bin/docker-php-ext-configure zip --with-zlib-dir=/usr --with-pcre-dir=/usr --with-libzip \
+    && /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) zip \
+    && (rm -rf /usr/local/lib/php/test/zip || true) \
+    && (rm -rf /usr/local/lib/php/doc/zip || true) \
 # ---- Removing Build dependencies ----
     && apk del .build-deps
 
 ENV RUN_DEPS="sudo dumb-init libarchive-tools icu gettext jq zip git wget \
             freetype libjpeg-turbo libpng libzip imagemagick \
-            socat supervisor ca-certificates bash ncurses"
+            socat monit ca-certificates bash ncurses"
 
 RUN set -x \
 # ---- Installing Running dependencies ----
     && apk --update add ${RUN_DEPS} \
     && update-ca-certificates \
 # ---- Installing Running env ----
-    && rm -rf /etc/supervisor* \
-    && mkdir -p /etc/supervisor/conf.d \
-    && mkdir -p /var/log/supervisor \
-    && mkdir -p /run.d \
     && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 
 WORKDIR /var/www
 ENV TERM="xterm-color"
-COPY supervisord.conf /etc/supervisor/supervisord.conf
+COPY monit/* /etc/monit/
 COPY entrypoint.sh /entrypoint.sh
 COPY func.d/*.sh /scripts/func.d/
-RUN chmod +x /entrypoint.sh \
+RUN chmod 600 /etc/monit/monitrc \
+    && mkdir -p /etc/monit/conf.d \
+    && ln -sf /etc/monit/monitrc /etc/monitrc \
+    && mkdir -p /var/lib/monit/events \
+    && chmod +x /entrypoint.sh \
     && chmod +x /scripts/func.d/*.sh \
-    && mkdir -p /scripts/pre-init.d
+    && mkdir -p /scripts/pre-init.d \
+    && mkdir -p /scripts/monit.d
 
 ENTRYPOINT ["dumb-init", "/entrypoint.sh"]

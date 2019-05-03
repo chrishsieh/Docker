@@ -10,7 +10,7 @@ set -u
 # Path to scripts to source
 FUNC_DIR="/scripts/func.d"
 # Supervisord config directory
-SUPERVISOR_CONFD="/etc/supervisor/conf.d"
+MONIT_CONFD="/etc/monit/conf.d"
 RUNTIME_CONFIG_DIR="/scripts/pre-init.d"
 
 ###
@@ -53,21 +53,34 @@ for line in $( port_forward_get_lines "FORWARD_PORTS_TO_LOCALHOST" ); do
 	lport="$( port_forward_get_lport "${line}" )"
 	rhost="$( port_forward_get_rhost "${line}" )"
 	rport="$( port_forward_get_rport "${line}" )"
-	supervisor_add_service \
+	monit_add_service \
 		"socat-${lport}-${rhost}-${rport}" \
-		"/usr/bin/socat tcp-listen:${lport},reuseaddr,fork tcp:${rhost}:${rport}" "root" \
-		"${SUPERVISOR_CONFD}" \
+		"matching \"tcp-listen:${lport},reuseaddr,fork tcp:${rhost}:${rport}\"" \
+		"/usr/bin/socat tcp-listen:${lport},reuseaddr,fork tcp:${rhost}:${rport}" \
+		"/usr/bin/socat tcp-listen:${lport},reuseaddr,fork" \
+		"root" \
+		"${MONIT_CONFD}" \
+		"if does not exist" \
 		"${DEBUG_LEVEL}"
 done
 
 ###
 ### Supervisor: php-fpm
 ###
-supervisor_add_service "php-fpm" "/usr/local/sbin/php-fpm" "root" "${SUPERVISOR_CONFD}" "${DEBUG_LEVEL}"
+monit_add_service \
+	"php-fpm" \
+	"pidfile /usr/local/var/run/php-fpm.pid" \
+	"/usr/local/sbin/php-fpm" \
+	"/bin/bash -c echo 'php-fpm stop'" \
+	"root" \
+	"${MONIT_CONFD}" \
+	"if failed host 127.0.0.1 port 9000 type tcp" \
+	"${DEBUG_LEVEL}"
 
 ###
 ###
 ### Startup
 ###
-log "info" "Starting supervisord" "${DEBUG_LEVEL}"
-exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
+/usr/bin/monit -t
+log "info" "Starting monit" "${DEBUG_LEVEL}"
+exec /usr/bin/monit -Ic /etc/monitrc
