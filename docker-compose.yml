@@ -17,6 +17,7 @@ services:
       - ./setting/nginx/proxy.conf:/etc/nginx/proxy.conf:ro
       - ./setting/nginx/nginx.tmpl:/app/nginx.tmpl:ro
       - ./setting/nginx/updatessl.sh:/app/updatessl.sh
+      - ./setting/nginx/pre-init.d/:/scripts/pre-init.d/
       - ${_CERTS_FOLDER:-./keys}/acme:/acmecerts                #acme.sh install folder
       - ${_CERTS_FOLDER:-./keys}/certs:/etc/nginx/certs         #certs folder
       - ${_LOG_FOLDER:-./log}/nginx:/var/log/nginx              #log
