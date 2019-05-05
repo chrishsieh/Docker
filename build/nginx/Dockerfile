@@ -6,7 +6,7 @@ RUN apk add --update jq \
 
 ENV TERM="xterm-color"
 COPY ./entrypoint.sh /app
-RUN chmod +x /app/entrypoint.sh
+RUN chmod +x /app/*.sh
 EXPOSE 443
 
 ENTRYPOINT ["/app/entrypoint.sh"]
