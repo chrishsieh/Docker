@@ -2,6 +2,7 @@ version: '3.5'
 services:
   web:
     container_name: web
+    image: churchcrm/web:latest
     build:
       context: ./build/nginx
     environment:
@@ -33,7 +34,9 @@ services:
 
   db:
     container_name: db
+    image: churchcrm/db:${_DB_OS:-alpine}
     build:
+      dockerfile: Dockerfile.${_DB_OS:-alpine}
       context: ./build/mysql
     volumes:
       - db-volume:/var/lib/mysql
@@ -43,7 +46,9 @@ services:
 
   php:
     container_name: php
+    image: churchcrm/php:${_PHP_OS:-debian}
     build:
+      dockerfile: Dockerfile.${_PHP_OS:-debian}
       context: ./build/php
     links:
       - db
