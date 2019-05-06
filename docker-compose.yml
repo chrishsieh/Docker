@@ -61,6 +61,8 @@ services:
       - VIRTUAL_PROTO=fastcgi
       - VIRTUAL_ROOT=/var/www/CRM/churchcrm
       - VIRTUAL_PORT=9000
+      - EXTRA_RWRULE=churchcrm
+      - EXTRA_RWRULE_LOCATION=churchcrm_location
       - FORWARD_PORTS_TO_LOCALHOST=${_WEB_HTTP_PORT:-80}:web:80,${_WEB_HTTPS_PORT:-443}:web:443
       - ENABLE_ACME=${_ENABLE_ACME:-false}                  ##### letsencrypt setting
       - ENABLE_HSTS=${_ENABLE_HSTS:-false}
