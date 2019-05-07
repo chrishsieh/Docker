@@ -74,6 +74,9 @@ COPY entrypoint.sh /entrypoint.sh
 COPY func.d/*.sh /scripts/func.d/
 RUN chmod +x /entrypoint.sh \
     && chmod +x /scripts/func.d/*.sh \
-    && mkdir -p /scripts/pre-init.d
+    && mkdir -p /scripts/pre-init.d \
+    && echo "alias ls='ls --color=auto'" >> /root/.bashrc \
+    && echo "alias ll='ls --color=auto -l'" >> /root/.bashrc \
+    && echo "alias l='ls --color=auto -lA'" >> /root/.bashrc
 
 ENTRYPOINT ["dumb-init", "/entrypoint.sh"]

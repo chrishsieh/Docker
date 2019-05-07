@@ -71,7 +71,8 @@ services:
       - ./setting/php/pre-init.d/:/scripts/pre-init.d/
       - ./setting/php/php.ini:/usr/local/etc/php/php.ini
       - ./setting/php/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro
-      - ${_LOG_FOLDER:-./log}/php:/usr/local/var/log        #### log
+      - ${_LOG_FOLDER:-./log}/php:/usr/local/var/log      #### log
+      - ${_LOG_FOLDER:-./log}/churchcrm:/mnt/logs         #### log
     secrets:
       - crm_secrets
 
