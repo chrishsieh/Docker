@@ -30,7 +30,7 @@ RUN set -eux; \
 	gosu nobody true
 
 RUN set -x \
-    && apk --update add --no-cache bash jq mariadb mariadb-client mariadb-server-utils pwgen tzdata socat \
+    && apk --update add --no-cache dumb-init bash jq mariadb mariadb-client mariadb-server-utils pwgen tzdata socat ncurses \
     && rm -f /var/cache/apk/*
 #COPY --from=mariadb:latest /usr/local/bin/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 COPY ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
@@ -51,4 +51,4 @@ RUN set -x \
 ENV TERM="xterm-color"
 EXPOSE 3306
 VOLUME ["/var/lib/mysql"]
-ENTRYPOINT ["/scripts/entrypoint.sh"]
+ENTRYPOINT ["dumb-init", "/scripts/entrypoint.sh"]
