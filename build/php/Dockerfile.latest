@@ -2,7 +2,7 @@ FROM php:7-fpm
 MAINTAINER ChurchCRM
 
 ENV BUILD_DEPS="cmake libicu-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev libzip-dev libmagickwand-dev" \
-    RUN_DEPS="sudo dumb-init gettext jq zip git unzip locales locales-all wget curl \
+    RUN_DEPS="sudo dumb-init gettext jq zip git unzip locales wget curl \
             libfreetype6 libjpeg62-turbo libpng16-16 libzip4 libmagickwand-6.q16-3 \
             socat supervisor ca-certificates"
 
@@ -68,9 +68,11 @@ WORKDIR /var/www
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 COPY entrypoint.sh /entrypoint.sh
 COPY func.d/*.sh /scripts/func.d/
+COPY locale.gen /etc/locale.gen
 RUN chmod +x /entrypoint.sh \
     && chmod +x /scripts/func.d/*.sh \
     && mkdir -p /scripts/pre-init.d \
+    && locale-gen \
     && echo "alias ls='ls --color=auto'" >> /root/.bashrc \
     && echo "alias ll='ls --color=auto -l'" >> /root/.bashrc \
     && echo "alias l='ls --color=auto -lA'" >> /root/.bashrc
