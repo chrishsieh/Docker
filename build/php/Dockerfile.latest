@@ -1,7 +1,10 @@
 FROM php:7-fpm
 MAINTAINER ChurchCRM
 
-ENV BUILD_DEPS="cmake libicu-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev libzip-dev libmagickwand-dev"
+ENV BUILD_DEPS="cmake libicu-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev libzip-dev libmagickwand-dev" \
+    RUN_DEPS="sudo dumb-init gettext jq zip git unzip locales locales-all wget curl \
+            libfreetype6 libjpeg62-turbo libpng16-16 libzip4 libmagickwand-6.q16-3 \
+            socat supervisor ca-certificates"
 
 RUN set -x \
 # ---- Installing Build dependencies ----
@@ -48,14 +51,8 @@ RUN set -x \
 	&& (rm -rf /usr/local/lib/php/test/zip || true) \
 	&& (rm -rf /usr/local/lib/php/doc/zip || true) \
 # ---- Removing Build dependencies ----
-    && DEBIAN_FRONTEND=noninteractive apt-get purge -qq -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false ${BUILD_DEPS}
-
-ENV RUN_DEPS="sudo dumb-init gettext jq zip git unzip locales locales-all wget curl \
-            libfreetype6 libjpeg62-turbo libpng16-16 libzip4 libmagickwand-6.q16-3 \
-            socat supervisor ca-certificates"
-
+    && DEBIAN_FRONTEND=noninteractive apt-get purge -qq -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false ${BUILD_DEPS} \
 # ---- Installing Running dependencies ----
-RUN set -x \
     && DEBIAN_FRONTEND=noninteractive apt-get install -qq -y --no-install-recommends --no-install-suggests ${RUN_DEPS} \
     && DEBIAN_FRONTEND=noninteractive apt-get purge -qq -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false apt-utils \
     && rm -rf /var/lib/apt/lists/* \
@@ -68,7 +65,6 @@ RUN set -x \
     && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 
 WORKDIR /var/www
-ENV TERM="xterm-color"
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 COPY entrypoint.sh /entrypoint.sh
 COPY func.d/*.sh /scripts/func.d/
@@ -78,5 +74,7 @@ RUN chmod +x /entrypoint.sh \
     && echo "alias ls='ls --color=auto'" >> /root/.bashrc \
     && echo "alias ll='ls --color=auto -l'" >> /root/.bashrc \
     && echo "alias l='ls --color=auto -lA'" >> /root/.bashrc
+
+ENV TERM="xterm-color"
 
 ENTRYPOINT ["dumb-init", "/entrypoint.sh"]
