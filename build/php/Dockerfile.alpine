@@ -9,8 +9,8 @@ RUN set -x \
 # ---- Update PHP pecl ----
     && pecl channel-update pecl.php.net \
 # ---- Installing PHP Extension: exif ----
-	&& /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) exif \
-	&& (rm -rf /usr/local/lib/php/test/exif || true) \
+    && /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) exif \
+    && (rm -rf /usr/local/lib/php/test/exif || true) \
     && (rm -rf /usr/local/lib/php/doc/exif || true) \
 # ---- Installing PHP Extension: gd ----
     && /usr/local/bin/docker-php-ext-configure gd --with-gd --with-png-dir=/usr --with-zlib-dir=/usr --with-jpeg-dir=/usr --with-freetype-dir=/usr --enable-gd-jis-conv \
@@ -19,32 +19,32 @@ RUN set -x \
     && (rm -rf /usr/local/lib/php/test/gd || true) \
     && (rm -rf /usr/local/lib/php/doc/gd || true) \
 # ---- Installing PHP Extension: gettext ----
-	&& /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) gettext \
-	&& (rm -rf /usr/local/lib/php/test/gettext || true) \
+    && /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) gettext \
+    && (rm -rf /usr/local/lib/php/test/gettext || true) \
     && (rm -rf /usr/local/lib/php/doc/gettext || true) \
 # ---- Installing PHP Extension: imagick ----
-	&& pecl install imagick \
-	&& docker-php-ext-enable imagick \
-	&& (rm -rf /usr/local/lib/php/test/imagick || true) \
-	&& (rm -rf /usr/local/lib/php/doc/imagick || true) \
+    && pecl install imagick \
+    && docker-php-ext-enable imagick \
+    && (rm -rf /usr/local/lib/php/test/imagick || true) \
+    && (rm -rf /usr/local/lib/php/doc/imagick || true) \
 # ---- Installing PHP Extension: intl ----
-	&& /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) intl \
-	&& (rm -rf /usr/local/lib/php/test/intl || true) \
+    && /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) intl \
+    && (rm -rf /usr/local/lib/php/test/intl || true) \
     && (rm -rf /usr/local/lib/php/doc/intl || true) \
 # ---- Installing PHP Extension: mysqli ----
-	&& /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) mysqli \
-	&& (rm -rf /usr/local/lib/php/test/mysqli || true) \
+    && /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) mysqli \
+    && (rm -rf /usr/local/lib/php/test/mysqli || true) \
     && (rm -rf /usr/local/lib/php/doc/mysqli || true) \
 # ---- Installing PHP Extension: pdo_mysql ----
-	&& /usr/local/bin/docker-php-ext-configure pdo_mysql --with-zlib-dir=/usr \
-	&& /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) pdo_mysql \
-	&& (rm -rf /usr/local/lib/php/test/pdo_mysql || true) \
+    && /usr/local/bin/docker-php-ext-configure pdo_mysql --with-zlib-dir=/usr \
+    && /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) pdo_mysql \
+    && (rm -rf /usr/local/lib/php/test/pdo_mysql || true) \
     && (rm -rf /usr/local/lib/php/doc/pdo_mysql || true) \
 # ---- Installing PHP Extension: zip ----
-	&& /usr/local/bin/docker-php-ext-configure zip --with-zlib-dir=/usr --with-pcre-dir=/usr --with-libzip \
-	&& /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) zip \
-	&& (rm -rf /usr/local/lib/php/test/zip || true) \
-	&& (rm -rf /usr/local/lib/php/doc/zip || true) \
+    && /usr/local/bin/docker-php-ext-configure zip --with-zlib-dir=/usr --with-pcre-dir=/usr --with-libzip \
+    && /usr/local/bin/docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) zip \
+    && (rm -rf /usr/local/lib/php/test/zip || true) \
+    && (rm -rf /usr/local/lib/php/doc/zip || true) \
 # ---- Removing Build dependencies ----
     && apk del .build-deps
 
@@ -71,5 +71,21 @@ COPY func.d/*.sh /scripts/func.d/
 RUN chmod +x /entrypoint.sh \
     && chmod +x /scripts/func.d/*.sh \
     && mkdir -p /scripts/pre-init.d
+
+# Install language pack
+RUN apk --no-cache add ca-certificates wget \
+    && wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
+    && wget -q https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.25-r0/glibc-2.25-r0.apk \
+    && wget -q https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.25-r0/glibc-bin-2.25-r0.apk \
+    && wget -q https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.25-r0/glibc-i18n-2.25-r0.apk \
+    && apk add glibc-bin-2.25-r0.apk glibc-i18n-2.25-r0.apk glibc-2.25-r0.apk
+
+# Iterate through all locale and install it
+# Note that locale -a is not available in alpine linux, use `/usr/glibc-compat/bin/locale -a` instead
+COPY locale.md /etc/locale.md
+RUN set -x \
+    && ln -s /usr/glibc-compat/bin/locale /usr/sbin/locale \
+    && ln -s /usr/glibc-compat/bin/localedef /usr/sbin/localedef \
+    && cat /etc/locale.md | xargs -i localedef -i {} -f UTF-8 {}
 
 ENTRYPOINT ["dumb-init", "/entrypoint.sh"]

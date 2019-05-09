@@ -54,7 +54,7 @@ services:
       - db
     environment:
       - MYSQL_DB_HOST=db
-      - LC_ALL=${_ALPINE_LC_ALL:-en_US}
+#      - LC_ALL=${_ALPINE_LC_ALL:-en_US}
       ##### RELEASE_VERSION avaiable value: latest, 3.1.0
       - RELEASE_VERSION=${_CRM_VERSION:-latest}
       - VIRTUAL_HOST=${_VIRTUAL_HOST:-localhost}

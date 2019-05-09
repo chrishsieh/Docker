@@ -10,7 +10,7 @@ if ! [ -f ./CRM/churchcrm/index.php ]; then
     else
         crmlatest="https://github.com/ChurchCRM/CRM/releases/download/${RELEASE_VERSION}/ChurchCRM-${RELEASE_VERSION}.zip";
     fi
-    wget $crmlatest
+    wget -q $crmlatest
     unzip -q -o *.zip -d CRM/
     rm -rf *.zip
     if ! [ -d /mnt/logs ]; then
@@ -18,7 +18,7 @@ if ! [ -f ./CRM/churchcrm/index.php ]; then
     fi
     cp CRM/churchcrm/logs/.htaccess /mnt/logs
     rm -rf CRM/churchcrm/logs
-    ln -s /mnt/logs CRM/churchcrm/logs 
+    ln -s /mnt/logs CRM/churchcrm/logs
     chown -R www-data:www-data CRM
 fi
 
