@@ -68,11 +68,13 @@ WORKDIR /var/www
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 COPY entrypoint.sh /entrypoint.sh
 COPY func.d/*.sh /scripts/func.d/
-COPY locale.gen /etc/locale.gen
+COPY locale.md /etc/locale.md
 RUN chmod +x /entrypoint.sh \
     && chmod +x /scripts/func.d/*.sh \
     && mkdir -p /scripts/pre-init.d \
+    && cat /etc/locale.md | xargs -t -i sed -i 's/# {}.UTF-8 UTF-8/{}.UTF-8 UTF-8/' /etc/locale.gen \
     && locale-gen \
+    && cat /etc/locale.md | xargs -i localedef -i {} -f UTF-8 {} \
     && echo "alias ls='ls --color=auto'" >> /root/.bashrc \
     && echo "alias ll='ls --color=auto -l'" >> /root/.bashrc \
     && echo "alias l='ls --color=auto -lA'" >> /root/.bashrc
